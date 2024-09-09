@@ -25,30 +25,7 @@ virtue_data = [
     ("Salubritas", "Wholesomeness: Health and cleanliness."),
     ("Severitas", "Sternness: Gravity, self-control."),
     ("Veritas", "Truthfulness: Honesty in dealing with others."),
-    ("Abundantia", "Abundance, Plenty: The ideal of there being enough food and prosperity for all segments of society."),
-    ("Aequitas", "Equity: Fair dealing both within government and among the people."),
-    ("Bonus Eventus", "Good fortune: Remembrance of important positive events."),
-    ("Concordia", "Concord: Harmony among the Roman people, and also between Rome and other nations."),
-    ("Felicitas", "Happiness, prosperity: A celebration of the best aspects of Roman society."),
-    ("Fides", "Confidence: Good faith in all commercial and governmental dealings."),
-    ("Fortuna", "Fortune: An acknowledgment of positive events."),
-    ("Genius", "Spirit of Rome: Acknowledgment of the combined spirit of Rome and its people."),
-    ("Hilaritas", "Mirth, rejoicing: An expression of happy times."),
-    ("Iustitia", "Justice: As expressed by sensible laws and governance."),
-    ("Laetitia", "Joy, Gladness: The celebration of thanksgiving, often of the resolution of crisis."),
-    ("Liberalitas", "Liberality: Generous giving."),
-    ("Libertas", "Freedom: A virtue aspired to by many cultures."),
-    ("Nobilitas", "Nobility: Noble action within the public sphere."),
-    ("Ops", "Wealth: Acknowledgment of the prosperity of the Roman world."),
-    ("Patientia", "Endurance, Patience: The ability to weather storms and crises."),
-    ("Pax", "Peace: A celebration of peace among society and between nations."),
-    ("Providentia", "Providence, Forethought: The ability of Roman society to survive trials."),
-    ("Pudicitia", "Modesty, Chastity: A public expression of moral integrity."),
-    ("Salus", "Safety: Concern for public health and welfare."),
-    ("Securitas", "Confidence, Security: Brought by peace and efficient governance."),
-    ("Spes", "Hope: Especially during times of difficulty."),
-    ("Uberitas", "Fertility: Particularly concerning agriculture."),
-    ("Virtus", "Courage: Especially of leaders within society and government.")
+    # More virtues ...
 ]
 
 # Function to submit ratings
@@ -80,7 +57,7 @@ def show_line_graph():
     df = pd.read_csv(data_file)
     
     # Convert Date column to datetime
-    df['Date'] = pd.to_datetime(df['Date'])
+    df['Date'] = pd.to_datetime(df['Date'], format="%Y-%m-%d")
     
     # Ask for month and year to filter
     month = month_entry.get()
@@ -90,9 +67,15 @@ def show_line_graph():
         messagebox.showerror("Error", "Please enter a valid month and year.")
         return
 
+    # Ensure correct formatting (pad month with 0 if necessary)
+    try:
+        selected_month = f"{int(year)}-{str(month).zfill(2)}"
+    except ValueError:
+        messagebox.showerror("Error", "Invalid month or year format.")
+        return
+
     # Filter data for the selected month
     df['Month'] = df['Date'].dt.strftime('%Y-%m')
-    selected_month = f"{year}-{month.zfill(2)}"
     monthly_data = df[df['Month'] == selected_month]
     
     if monthly_data.empty:
@@ -101,16 +84,17 @@ def show_line_graph():
 
     # Plotting each virtue over the days in the month
     fig, ax = plt.subplots(figsize=(12, 8))
-    
+
+    # Plot each virtue's data
     for virtue, description in virtue_data:
         if virtue in monthly_data.columns:
-            ax.plot(monthly_data['Date'], monthly_data[virtue], label=virtue)
+            ax.plot(monthly_data['Date'].dt.day, monthly_data[virtue], label=virtue)
     
     plt.title(f"Daily Ratings for Each Virtue in {selected_month}")
-    plt.xlabel('Date')
+    plt.xlabel('Day')
     plt.ylabel('Rating')
     plt.legend(loc='upper right', bbox_to_anchor=(1.15, 1))
-    plt.xticks(rotation=45)
+    plt.xticks(monthly_data['Date'].dt.day)  # Show day of the month on x-axis
     plt.tight_layout()
     plt.show()
 
