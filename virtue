@@ -1,0 +1,174 @@
+import tkinter as tk
+from tkinter import messagebox, ttk
+import pandas as pd
+from datetime import datetime
+import os
+import matplotlib.pyplot as plt
+
+# File to store data
+data_file = "virtue_ratings.csv"
+
+# List of virtues and their descriptions
+virtue_data = [
+    ("Auctoritas", "Spiritual Authority: The sense of one's social standing, built up through experience, Pietas, and Industria."),
+    ("Comitas", "Humour: Ease of manner, courtesy, openness, and friendliness."),
+    ("Clementia", "Mercy: Mildness and gentleness."),
+    ("Dignitas", "Dignity: A sense of self-worth, personal pride."),
+    ("Firmitas", "Tenacity: Strength of mind, the ability to stick to one's purpose."),
+    ("Frugalitas", "Frugalness: Economy and simplicity of style, without being miserly."),
+    ("Gravitas", "Gravity: A sense of the importance of the matter at hand, responsibility and earnestness."),
+    ("Honestas", "Respectability: The image that one presents as a respectable member of society."),
+    ("Humanitas", "Humanity: Refinement, civilization, learning, and being cultured."),
+    ("Industria", "Industriousness: Hard work."),
+    ("Pietas", "Dutifulness: Respect for the natural order socially, politically, and religiously."),
+    ("Prudentia", "Prudence: Foresight, wisdom, and personal discretion."),
+    ("Salubritas", "Wholesomeness: Health and cleanliness."),
+    ("Severitas", "Sternness: Gravity, self-control."),
+    ("Veritas", "Truthfulness: Honesty in dealing with others."),
+    ("Abundantia", "Abundance, Plenty: The ideal of there being enough food and prosperity for all segments of society."),
+    ("Aequitas", "Equity: Fair dealing both within government and among the people."),
+    ("Bonus Eventus", "Good fortune: Remembrance of important positive events."),
+    ("Concordia", "Concord: Harmony among the Roman people, and also between Rome and other nations."),
+    ("Felicitas", "Happiness, prosperity: A celebration of the best aspects of Roman society."),
+    ("Fides", "Confidence: Good faith in all commercial and governmental dealings."),
+    ("Fortuna", "Fortune: An acknowledgment of positive events."),
+    ("Genius", "Spirit of Rome: Acknowledgment of the combined spirit of Rome and its people."),
+    ("Hilaritas", "Mirth, rejoicing: An expression of happy times."),
+    ("Iustitia", "Justice: As expressed by sensible laws and governance."),
+    ("Laetitia", "Joy, Gladness: The celebration of thanksgiving, often of the resolution of crisis."),
+    ("Liberalitas", "Liberality: Generous giving."),
+    ("Libertas", "Freedom: A virtue aspired to by many cultures."),
+    ("Nobilitas", "Nobility: Noble action within the public sphere."),
+    ("Ops", "Wealth: Acknowledgment of the prosperity of the Roman world."),
+    ("Patientia", "Endurance, Patience: The ability to weather storms and crises."),
+    ("Pax", "Peace: A celebration of peace among society and between nations."),
+    ("Providentia", "Providence, Forethought: The ability of Roman society to survive trials."),
+    ("Pudicitia", "Modesty, Chastity: A public expression of moral integrity."),
+    ("Salus", "Safety: Concern for public health and welfare."),
+    ("Securitas", "Confidence, Security: Brought by peace and efficient governance."),
+    ("Spes", "Hope: Especially during times of difficulty."),
+    ("Uberitas", "Fertility: Particularly concerning agriculture."),
+    ("Virtus", "Courage: Especially of leaders within society and government.")
+]
+
+# Function to submit ratings
+def submit_ratings():
+    ratings = {}
+    for virtue, scale in scales.items():
+        ratings[virtue] = scale.get()
+    
+    # Add current date
+    ratings['Date'] = datetime.now().strftime("%Y-%m-%d")
+    
+    # Convert to DataFrame
+    df = pd.DataFrame([ratings])
+    
+    # Append to CSV
+    if not os.path.exists(data_file):
+        df.to_csv(data_file, index=False)
+    else:
+        df.to_csv(data_file, mode='a', header=False, index=False)
+    
+    messagebox.showinfo("Success", "Your ratings have been saved!")
+
+# Function to display monthly statistics (line graph)
+def show_line_graph():
+    if not os.path.exists(data_file):
+        messagebox.showerror("Error", "No data available.")
+        return
+    
+    df = pd.read_csv(data_file)
+    
+    # Convert Date column to datetime
+    df['Date'] = pd.to_datetime(df['Date'])
+    
+    # Ask for month and year to filter
+    month = month_entry.get()
+    year = year_entry.get()
+
+    if not (month and year):
+        messagebox.showerror("Error", "Please enter a valid month and year.")
+        return
+
+    # Filter data for the selected month
+    df['Month'] = df['Date'].dt.strftime('%Y-%m')
+    selected_month = f"{year}-{month.zfill(2)}"
+    monthly_data = df[df['Month'] == selected_month]
+    
+    if monthly_data.empty:
+        messagebox.showerror("Error", f"No data found for {selected_month}.")
+        return
+
+    # Plotting each virtue over the days in the month
+    fig, ax = plt.subplots(figsize=(12, 8))
+    
+    for virtue, description in virtue_data:
+        if virtue in monthly_data.columns:
+            ax.plot(monthly_data['Date'], monthly_data[virtue], label=virtue)
+    
+    plt.title(f"Daily Ratings for Each Virtue in {selected_month}")
+    plt.xlabel('Date')
+    plt.ylabel('Rating')
+    plt.legend(loc='upper right', bbox_to_anchor=(1.15, 1))
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.show()
+
+# GUI setup
+root = tk.Tk()
+root.title("Virtue Assessment")
+
+# Create a canvas with scrollbar to allow all virtues to be visible
+canvas = tk.Canvas(root)
+scrollbar = tk.Scrollbar(root, orient="vertical", command=canvas.yview)
+scrollable_frame = ttk.Frame(canvas)
+
+scrollable_frame.bind(
+    "<Configure>",
+    lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+)
+
+canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+canvas.configure(yscrollcommand=scrollbar.set)
+
+# Create sliders for each virtue
+scales = {}
+
+for virtue, description in virtue_data:
+    # Add virtue label
+    virtue_label = tk.Label(scrollable_frame, text=virtue, font=("Arial", 12, "bold"))
+    virtue_label.pack()
+    
+    # Add description label
+    description_label = tk.Label(scrollable_frame, text=description, font=("Arial", 10), wraplength=400)
+    description_label.pack()
+    
+    # Add slider
+    scale = tk.Scale(scrollable_frame, from_=1, to=10, orient=tk.HORIZONTAL)
+    scale.pack()
+    scales[virtue] = scale
+
+# Pack the canvas and scrollbar
+canvas.pack(side="left", fill="both", expand=True)
+scrollbar.pack(side="right", fill="y")
+
+# Entry fields for month and year
+month_label = tk.Label(root, text="Enter Month (MM):")
+month_label.pack()
+month_entry = tk.Entry(root)
+month_entry.pack()
+
+year_label = tk.Label(root, text="Enter Year (YYYY):")
+year_label.pack()
+year_entry = tk.Entry(root)
+year_entry.pack()
+
+# Submit button
+submit_button = tk.Button(root, text="Submit Ratings", command=submit_ratings)
+submit_button.pack()
+
+# Show line graph button
+line_graph_button = tk.Button(root, text="Show Line Graph for Month", command=show_line_graph)
+line_graph_button.pack()
+
+root.mainloop()
