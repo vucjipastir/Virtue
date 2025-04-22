@@ -1,141 +1,98 @@
-Created with ChatGPT 4.0
+🏛️ Virtue Tracker
 
-# Virtue Assessment Application
+A personal virtue tracking app built with Python and Tkinter, inspired by Roman values and Benjamin Franklin's method of self-improvement. Users can rate themselves daily on a wide range of virtues, provide justifications, and visualize progress across time.
+📸 Features
 
-## Table of Contents
+    ✅ Daily self-assessment of Roman virtues
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-  - [Running the Application](#running-the-application)
-  - [Submitting Ratings](#submitting-ratings)
-  - [Viewing Statistics](#viewing-statistics)
-- [Data Storage](#data-storage)
-- [Contribution Guidelines](#contribution-guidelines)
-  - [How to Contribute](#how-to-contribute)
-  - [Code of Conduct](#code-of-conduct)
-- [Known Issues](#known-issues)
-- [License](#license)
+    📝 Space to justify each rating
 
----
+    💾 Saves logs to local files
 
-## Introduction
+    📊 Monthly graph visualizations
 
-The **Virtue Assessment Application** is a personal development tool designed to help individuals evaluate themselves daily on various virtues based on ancient Roman values. Users can rate themselves on virtues such as Auctoritas, Dignitas, and Pietas using an easy-to-use graphical interface. The application allows users to track their progress over time and view monthly statistics in the form of line graphs.
+    📂 View past entries via an interactive date selector
 
-## Features
+    📅 Inspired by Benjamin Franklin's method of tracking and improving personal virtues
 
-- Daily self-assessment using sliders for 40+ virtues.
-- Descriptions provided for each virtue to guide users in their assessment.
-- Data is saved locally in a CSV file for easy tracking.
-- Monthly statistics presented as line graphs to visualize progress.
-- Simple, clean, and scrollable user interface using `Tkinter`.
+🧰 Requirements
 
-## Installation
+    Python 3.8+
 
-### Prerequisites
+    Libraries:
 
-Before running this project, make sure you have the following installed:
+        pandas
 
-- [Python 3.x](https://www.python.org/downloads/)
-- Required Python libraries:
-  - `tkinter`
-  - `pandas`
-  - `matplotlib`
+        matplotlib
 
-### Steps
+        tkinter (comes with Python)
 
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/yourusername/virtue-assessment-app.git
-   ```
+Install dependencies:
 
-2. **Navigate to the project directory**:
-   ```bash
-   cd virtue-assessment-app
-   ```
+pip install pandas matplotlib
 
-3. **Install dependencies**:
-   You can install the required libraries using `pip`:
-   ```bash
-   pip install pandas matplotlib
-   ```
+🚀 Running the App
 
-   Note: `Tkinter` is typically included with Python on most systems. If you encounter any issues, refer to your operating system's instructions for installing Tkinter.
+    Clone this repo:
 
-## Usage
+git clone https://github.com/yourusername/virtue-tracker.git
+cd virtue-tracker
 
-### Running the Application
+    Run the application:
 
-1. **Launch the Application**:
-   In the project directory, run the following command to start the application:
-   ```bash
-   python virtue_assessment.py
-   ```
+python virtutes.py
 
-   The GUI window will open, displaying sliders for each virtue along with their descriptions.
+🧪 How It Works
+🌿 Rate Virtues
 
-### Submitting Ratings
+Scroll through a long list of Roman virtues and rate each one from 1 (low) to 5 (high), adding optional justifications. This is inspired by Benjamin Franklin's method, where Franklin tracked 13 virtues and worked on improving them systematically.
 
-2. **Submit Daily Ratings**:
-   - Adjust the sliders to rate yourself on each virtue (1 to 10).
-   - After setting your ratings, click the **Submit Ratings** button to save the data for that day.
-   - The ratings are stored in a CSV file named `virtue_ratings.csv` in the same directory.
+💾 Save Data
 
-### Viewing Statistics
+Click "Save Data" to store your entries. It will save:
 
-3. **View Monthly Statistics**:
-   - Enter the month and year in the input fields.
-   - Click the **Show Line Graph for Month** button to generate a line graph of your ratings for each virtue across the selected month.
+    A CSV file: virtues_YYYY-MM-DD.csv
 
-   The graph will display your daily progress for all virtues rated during that month.
+    A text file for notes: justifications_YYYY-MM-DD.txt
 
-## Data Storage
+These are saved to:
+📁 ~/Desktop/VirtueLogs/
+📈 Show Monthly Statistics
 
-The data is stored locally in a CSV file (`virtue_ratings.csv`). The file contains the following columns:
+Click "Show Monthly Statistics" to plot a line graph showing your progress for each virtue over the current month.
+📂 Open Memoire
 
-- **Date**: The date of the rating submission (in `YYYY-MM-DD` format).
-- **Virtue Name**: Each virtue has its own column containing the rating (from 1 to 10) given for that day.
+Click "Open Memoire" to choose a saved day and view both your virtue scores and written justifications from that date.
+📁 File Structure
 
-This CSV file can be easily imported into spreadsheet software or analyzed further using Python or other tools.
+virtutes.py            # Main app file
+VirtueLogs/            # Folder (auto-created) where daily logs are saved
+  ├── virtues_YYYY-MM-DD.csv
+  └── justifications_YYYY-MM-DD.txt
 
-## Contribution Guidelines
+📚 Virtues Included
 
-### How to Contribute
+The app tracks 40+ Roman virtues, such as:
 
-We welcome contributions! Here's how you can help:
+    Gravitas – Responsibility and seriousness
 
-1. **Fork the repository** on GitHub.
-2. **Clone your forked repository** to your local machine.
-   ```bash
-   git clone https://github.com/yourusername/virtue-assessment-app.git
-   ```
-3. **Create a new branch** for your changes:
-   ```bash
-   git checkout -b feature-or-bugfix-name
-   ```
-4. **Make your changes** to the project.
-5. **Test your changes** thoroughly.
-6. **Commit and push your changes** to your forked repository.
-7. **Create a pull request** from your fork to the original repository.
+    Industria – Hard work
 
-Please follow our [Code of Conduct](#code-of-conduct) when contributing.
+    Pietas – Respect for natural order
 
-### Code of Conduct
+    Virtus – Moral excellence and courage
 
-- Be respectful and collaborative in all communications.
-- Ensure your contributions are well-documented and tested.
-- Keep commit messages clear and concise.
+Full descriptions are visible in the app interface.
+💡 Potential Improvements
 
-## Known Issues
+    Export to PDF
 
-- **Graphing Large Datasets**: If you submit a large number of daily ratings, the graph may become crowded and difficult to read. Consider exporting the data to a more robust data visualization tool for long-term analysis.
+    Dark mode UI
 
-For other issues, please report them on the [GitHub Issues](https://github.com/yourusername/virtue-assessment-app/issues) page.
+    Cloud sync
 
-## License
+    Aggregated dashboards by week/month/year
 
-This project is licensed under the MIT License. You are free to use, modify, and distribute the software as long as the original copyright notice and permission notice are included.
+🛡️ License
 
----
+This project is open source and uses the MIT License.
