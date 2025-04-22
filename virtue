@@ -5,6 +5,7 @@ import datetime
 import os
 import matplotlib.pyplot as plt
 
+
 # List of virtues with descriptions
 virtues = {
     "Auctoritas": "Spiritual Authority: The sense of one's social standing, built up through experience, Pietas, and Industria.",
@@ -50,11 +51,9 @@ virtues = {
     "Virtus": "Courage: Especially of leaders within society and government."
 }
 
-# Create the main application window
+# GUI Setup
 root = tk.Tk()
 root.title("Virtue Tracker")
-
-# Create a frame for the sliders with a scrollbar
 frame = tk.Frame(root)
 frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
@@ -62,42 +61,40 @@ canvas = tk.Canvas(frame)
 scrollbar = ttk.Scrollbar(frame, orient="vertical", command=canvas.yview)
 scrollable_frame = tk.Frame(canvas)
 
-scrollable_frame.bind(
-    "<Configure>",
-    lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-)
-
+scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-
-# Add the scrollbar to the canvas
 canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 canvas.configure(yscrollcommand=scrollbar.set)
 
-# Dictionary to hold sliders and justification entries
 sliders = {}
 justifications = {}
 
-# Function to save data
 def save_data():
     date_str = datetime.date.today().strftime("%Y-%m-%d")
     data = {virtue: slider.get() for virtue, slider in sliders.items()}
     df = pd.DataFrame([data])
-    
-    filename = f"virtues_{date_str}.csv"
-    df.to_csv(filename, mode='a', header=not os.path.exists(filename), index=False)
-    messagebox.showinfo("Data Saved", f"Data saved to {filename}")
-    
-    # Save justifications to a text file
-    with open("justifications.txt", "a") as f:
-        for virtue, justification in justifications.items():
-            f.write(f"{date_str} - {virtue}: {justification.get()}\n")
 
-# Function to plot data
+    # Use Documents folder
+    save_dir = os.path.expanduser("~/Desktop/VirtueLogs")
+    os.makedirs(save_dir, exist_ok=True)
+
+    csv_path = os.path.join(save_dir, f"virtues_{date_str}.csv")
+    txt_path = os.path.join(save_dir, f"justifications_{date_str}.txt")
+
+    # Save virtue data
+    df.to_csv(csv_path, mode='a', header=not os.path.exists(csv_path), index=False)
+
+    # Save justifications
+    with open(txt_path, "w", encoding="utf-8") as f:
+        for virtue, justification in justifications.items():
+            content = justification.get().strip()
+            f.write(f"{virtue}: {content if content else '[No justification provided]'}\n")
+
+    messagebox.showinfo("Data Saved", f"Saved to:\n{csv_path}\n{txt_path}")
+
 def plot_data():
     month_data = {}
-    
-    # Read all CSV files for the current month
     for file in os.listdir():
         if file.startswith("virtues_") and file.endswith(".csv"):
             date_str = file.split("_")[1].split(".")[0]
@@ -109,7 +106,6 @@ def plot_data():
                         month_data[virtue] = []
                     month_data[virtue].extend(df[virtue].tolist())
     
-    # Plot the data
     for virtue, values in month_data.items():
         plt.plot(values, label=virtue)
     
@@ -119,16 +115,67 @@ def plot_data():
     plt.legend()
     plt.show()
 
-# Function to open the justifications file
-def open_memoire():
-    if os.path.exists("justifications.txt"):
-        with open("justifications.txt", "r") as f:
-            memoire_content = f.read()
-        messagebox.showinfo("Memoire", memoire_content)
-    else:
-        messagebox.showwarning("Warning", "No memoire file found.")
 
-# Create sliders for each virtue with descriptions and justification entries
+def open_memoire():
+    save_dir = os.path.expanduser("~/Desktop/VirtueLogs")
+    if not os.path.exists(save_dir):
+        messagebox.showwarning("No Data", "No data directory found.")
+        return
+
+    files = sorted(
+        [f for f in os.listdir(save_dir) if f.startswith("virtues_") and f.endswith(".csv")],
+        reverse=True
+    )
+    if not files:
+        messagebox.showwarning("No Data", "No virtue data files found.")
+        return
+
+    # Create a popup to select the date
+    def load_selected_data():
+        selected_file = var.get()
+        date_str = selected_file.split("_")[1].split(".")[0]
+        csv_path = os.path.join(save_dir, f"virtues_{date_str}.csv")
+        txt_path = os.path.join(save_dir, f"justifications_{date_str}.txt")
+
+        try:
+            df = pd.read_csv(csv_path)
+            scores = df.iloc[0].to_dict()
+        except Exception as e:
+            messagebox.showerror("Error", f"Failed to load CSV: {e}")
+            return
+
+        try:
+            with open(txt_path, "r", encoding="utf-8") as f:
+                justifications = f.read()
+        except FileNotFoundError:
+            justifications = "[No justifications found for this date.]"
+
+        display = f"Date: {date_str}\n\nVirtue Scores:\n"
+        display += "\n".join([f"{k}: {v}" for k, v in scores.items()])
+        display += "\n\nJustifications:\n" + justifications
+
+        # Show all in one big messagebox or text window
+        viewer = tk.Toplevel(root)
+        viewer.title(f"Memoire - {date_str}")
+        text = tk.Text(viewer, wrap=tk.WORD, width=100, height=40)
+        text.pack(fill=tk.BOTH, expand=True)
+        text.insert(tk.END, display)
+
+    # Popup UI
+    popup = tk.Toplevel(root)
+    popup.title("Select Date")
+
+    tk.Label(popup, text="Select a saved date:").pack(pady=5)
+    var = tk.StringVar(popup)
+    var.set(files[0])  # default selection
+
+    dropdown = ttk.Combobox(popup, textvariable=var, values=files, width=40)
+    dropdown.pack(pady=5)
+
+    tk.Button(popup, text="Load Data", command=load_selected_data).pack(pady=10)
+    
+ 
+# Create sliders and justifications
 for index, (virtue, description) in enumerate(virtues.items()):
     label = tk.Label(scrollable_frame, text=f"{virtue}: {description}", wraplength=300, justify="left")
     label.grid(row=index, column=0, sticky="w", padx=10, pady=5)
@@ -141,17 +188,9 @@ for index, (virtue, description) in enumerate(virtues.items()):
     justification.grid(row=index, column=2, padx=10, pady=5)
     justifications[virtue] = justification
 
-# Save button
-save_button = tk.Button(root, text="Save Data", command=save_data)
-save_button.pack(pady=10)
+# Buttons
+tk.Button(root, text="Save Data", command=save_data).pack(pady=10)
+tk.Button(root, text="Show Monthly Statistics", command=plot_data).pack(pady=10)
+tk.Button(root, text="Open Memoire", command=open_memoire).pack(pady=10)
 
-# Plot button
-plot_button = tk.Button(root, text="Show Monthly Statistics", command=plot_data)
-plot_button.pack(pady=10)
-
-# Memoire button
-memoire_button = tk.Button(root, text="Open Memoire", command=open_memoire)
-memoire_button.pack(pady=10)
-
-# Run the application
 root.mainloop()
